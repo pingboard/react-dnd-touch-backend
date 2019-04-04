@@ -470,16 +470,22 @@ export class TouchBackend {
         let orderedDragOverTargetIds = elementsAtPointExtended
         // Filter off nodes that arent a hovered DropTargets nodes
             .filter(node => dragOverTargetNodes.indexOf(node) > -1)
-        // Map back the nodes elements to targetIds
+        // Map the node elements to all possible targetIds
             .map(node => {
+                const matchingIds = [];
+
+                // Nodes may have multiple targets associated with them
                 for (let targetId in this.targetNodes) {
                     if (node === this.targetNodes[targetId])
-                    {return targetId;}
+                    {matchingIds.push(targetId)}
                 }
-                return null;
+
+                return matchingIds;
             })
-        // Filter off possible null rows
-            .filter(node => !!node)
+        // Flatten two-dimensional array of targetIds to flat array of targetIds
+            .reduce((allIds, matchingIds) => [...allIds, ...matchingIds], [])
+        // Filter off possible null rows and duplicates
+            .filter(id => !!id)
             .filter((id, index, ids) => ids.indexOf(id) === index);
 
         // Invoke hover for drop targets when source node is still over and pointer is outside
